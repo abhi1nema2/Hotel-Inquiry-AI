@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+textarea#response {
+    width: 80%;
+    background-color: darkslategrey;
+    color: ghostwhite;
+}
+
+input#input {
+    width: 90%;
+} 
+        a#demo {
+            padding-left: 20%;
+        }
+</style>
+    <title>API</title>
+    <link rel="stylesheet" type="text/css" href="C:\Users\Abhishek\Desktop\su\mystyle.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+    var link;
+    var accessToken ="2633b8cba63049f5936172ebf07e2ff7";
+    var baseUrl = "https://api.dialogflow.com/v1/";
+    $(document).ready(function() {
+        $("#input").keypress(function(event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                send();
+this.value = '';
+            }
+        });
+        $("#rec").click(function(event) {
+            switchRecognition();
+        });
+    });
+    var recognition;
+    function startRecognition() {
+        recognition = new webkitSpeechRecognition();
+        recognition.onstart = function(event) {
+            updateRec();
+        };
+        recognition.onresult = function(event) {
+            var text = "";
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                text += event.results[i][0].transcript;
+                
+            }
+            setInput(text);
+            stopRecognition();
+        };
+        recognition.onend = function() {
+            stopRecognition();
+        };
+        recognition.lang = "en-US";
+        recognition.start();
+    }
+    function stopRecognition() {
+        if (recognition) {
+            recognition.stop();
+            recognition = null;
+        }
+        updateRec();
+    }
+    function switchRecognition() {
+        if (recognition) {
+            stopRecognition();
+        } else {
+            startRecognition();
+        }
+    }
+    function setInput(text) {
+        $("#input").val(text);
+        send();
+    }
+    function updateRec() {
+        $("#rec").text(recognition ? "Stop" : "Speak");
+    }
+function send() {
+        var text = $("#input").val();
+    conversation.push("Me: " + text + '\r\n');
+        $.ajax({
+            type: "POST",
+            url: baseUrl + "query?v=20150910",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + accessToken
+            },
+            data: JSON.stringify({ query: text, lang: "en", sessionId: "somerandomthing" }),
+            success: function(data) {
+                var respText = data.result.fulfillment.speech;
+                console.log("Respuesta: " + respText);
+                setResponse(respText);
+                $("#response").scrollTop($("#response").height());
+            },
+            error: function() {
+                setResponse("Internal Server Error");
+            }
+        });
+    }
+    function setResponse(val) {
+	    //Edit "AI: " to change name
+        if(val.includes("https"))
+        {
+            spl(val);
+        }
+        else
+        {
+            conversation.push("AI:" +val + "\r\n");   
+        }
+        $("#response").text(conversation.join(""));
+    }
+    function spl(val) {   
+        var s=val.split("https://");
+        var msg=s[0];
+        link=s[1];
+        conversation.push("AI:" +msg + "\r\n");
+        link='https://'+link;
+        //conversation.push(link + "\r\n");
+        document.getElementById("demo").innerHTML = link;
+        
+        document.getElementById("demo").href = link;
+    }
+    var conversation = [];
+</script>
+</head>
+
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header"><a class="navbar-brand navbar-link" href="#">Hotel Inquiry AI </a>
+                <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+            </div>
+            <div class="collapse navbar-collapse" id="navcol-1"></div>
+        </div>
+    </nav>
+    <div class="jumbotron" id="gg">
+        <p>Conversation: </p>
+        <textarea rows="12" id="response"></textarea>
+        <input type="text" placeholder="Enter text" id="input">
+    </div>
+    <p id="gg2">Helpful link:- </p>
+    <a id="demo" href=link></a>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>
